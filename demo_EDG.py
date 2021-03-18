@@ -1,17 +1,10 @@
+from EDG import EDG
+import funs as Ifuns
+import funs_metric as Mfuns
 import numpy as np
 import matplotlib.pyplot as plt
 
-import config
-import sys
-
-sys.path.append(config.IDEAL_path)
-import IDEAL_NPU.funs as Ifuns
-import IDEAL_NPU.funs_metric as Mfuns
-from IDEAL_NPU.cluster import EDG
-
-#  X, y_true, N, dim, c_true = Ifuns.load_Agg()
-X, y_true, N, dim, c_true = Ifuns.load_mat("/home/pei/EDG/toydata/Agg.mat")
-
+X, y_true, N, dim, c_true = Ifuns.load_mat("toydata/Agg.mat")
 X = X.astype(np.float64)
 
 D_full = Ifuns.EuDist2(X, X, squared=True)

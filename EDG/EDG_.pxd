@@ -8,7 +8,7 @@ cdef extern from "CppFuns.h" namespace "cf":
     double median_vec2d(vector[vector[double]] &v);
     double median_v(vector[double] &v, int copy);
 
-from IDEAL_NPU.CppFuns.Graph_ cimport Graph
+from CppFuns.Graph_ cimport Graph
 
 cdef extern from "EDG.cpp":
     pass

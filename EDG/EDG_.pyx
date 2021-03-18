@@ -2,9 +2,6 @@ cimport numpy as np
 import numpy as np
 np.import_array()
 
-from IDEAL_NPU import funs as Ifuns
-
-
 from .EDG_ cimport EDG
 
 cdef class PyEDG:

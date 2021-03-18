@@ -19,10 +19,10 @@ def configuration(parent_package='', top_path=None):
         library_dirs = []
         libraries = ["m"]
 
-    config = Configuration('EDG', parent_package, top_path)
-    config.add_extension('EDG_',
-                         sources=['EDG_.pyx'],
-                         include_dirs = [numpy.get_include(), "./CppFuns/"],
+    config = Configuration('CppFuns', parent_package, top_path)
+    config.add_extension('Graph_',
+                         sources=['Graph_.pyx'],
+                         include_dirs = [numpy.get_include(), "../../CppFuns/"],
                          language="c++",
                          extra_compile_args=ext_comp_args,
                          extra_link_args=ext_link_args,
