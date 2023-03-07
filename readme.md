@@ -2,7 +2,9 @@
 
 ### install
 ```
-python setup.py build_ext --inplace
+git clone xx
+cd master
+python setup.py install
 ```
 
 ### usage:

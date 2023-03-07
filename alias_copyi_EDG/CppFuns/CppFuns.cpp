@@ -99,7 +99,15 @@ namespace cf{
     template <typename T, typename U>
     void argsort_TwoArr(vector<T> &v1, vector<U> &v2, vector<int> &ind){
         iota(ind.begin(), ind.end(), 0);
-        std::sort(ind.begin(), ind.end(), [&v1, &v2](int i1, int i2){ return v1[i1] < v1[i2] || (v1[i1] < v1[i2] + 1e-8 && v2[i1] > v2[i2]); });
+        std::sort(ind.begin(), ind.end(), [&v1, &v2](int i1, int i2){
+	    // v1[i1] < v1[i2]
+	    T diff = abs(v1[i1] - v1[i2]);
+	    if (diff > 1e-10){
+	        return v1[i1] < v1[i2];
+        }else{
+	        return v2[i1] > v2[i2];
+	    }
+	});
     }
     template void argsort_TwoArr<int, int>(vector<int> &v1, vector<int> &v2, vector<int> &ind);
     template void argsort_TwoArr<double, double>(vector<double> &v1, vector<double> &v2, vector<int> &ind);

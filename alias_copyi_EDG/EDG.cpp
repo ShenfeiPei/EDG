@@ -58,14 +58,20 @@ double EDG::compute_tr(int i, int k){
     int j = NN[i][k];
     int wrow = 2*knn;
     int wcol = 2*knn;
-    double  *W = new double [wrow*wcol];
-    double  *L = new double [wrow*wcol];
-    double *diagA = new double [wrow];
-    int *ind_M = new int [wrow*wcol];
+    vector<vector<double>> W(wrow, vector<double>(wcol, 0));
+    vector<vector<double>> L(wrow, vector<double>(wcol, 0));
+    vector<double> diagA(wrow, 0);
+    vector<vector<int>> ind_M(wrow, vector<int>(wcol, 0));
+
+    //double  *W = new double [wrow*wcol];
+    //double  *L = new double [wrow*wcol];
+    //double *diagA = new double [wrow];
+    //int *ind_M = new int [wrow*wcol];
     int tmp_i, tmp_j;
     double tmp_d;
-    int *ind4sort = new int[wrow];
+    //int *ind4sort = new int[wrow];
 
+    vector<int> ind4sort(wrow, 0);
     for (int a = 0; a < wrow; a++){
         ind4sort[a] = a;
     }
@@ -77,15 +83,15 @@ double EDG::compute_tr(int i, int k){
             tmp_j = NN[i][b];
             tmp_d = dist(tmp_i, tmp_j);
 
-            W[a*wrow + b] = tmp_d;
-            W[b*wrow + a] = tmp_d;
+            W[a][b] = tmp_d;
+            W[b][a] = tmp_d;
 
             tmp_i = NN[j][a];
             tmp_j = NN[j][b];
             tmp_d = dist(tmp_i, tmp_j);
 
-            W[(knn + a)*wrow + knn + b] = tmp_d;
-            W[(knn + b)*wrow + knn + a] = tmp_d;
+            W[knn + a][knn + b] = tmp_d;
+            W[knn + b][knn + a] = tmp_d;
         }
     }
 
@@ -95,65 +101,59 @@ double EDG::compute_tr(int i, int k){
             tmp_i = NN[i][a];
             tmp_j = NN[j][b];
             tmp_d = dist(tmp_i, tmp_j);
-            W[a*wrow + knn + b] = tmp_d;
-            W[(knn + b)*wrow + a] = tmp_d;
+            W[a][knn + b] = tmp_d;
+            W[knn + b][a] = tmp_d;
         }
     }
-    for (int a = 0; a < wrow; a++) W[a*wrow + a] = -1;
-    for (int a = 0; a < wrow; a++){
-//        argsort_f(W + a*wrow, wcol, ind_M + a*wrow);
-        cf::argsort_TwoArr(W+a*wrow, ind4sort, wcol, ind_M + a*wrow);
+    for (int a = 0; a < wrow; a++) W[a][a] = -1;
+    for (int a = 2; a < wrow; a++){
+        cf::argsort_TwoArr(W[a], ind4sort, ind_M[a]);
     }
     for (int i1 = 0; i1 < wrow; i1++){
-
-        tmp_i = ind_M[i1*wrow + 0];
-        W[i1*wrow + tmp_i] = 0;
+        tmp_i = ind_M[i1][0];
+        W[i1][tmp_i] = 0;
 
         for (int j1 = 1; j1 < (knn + 1); j1++){
-            tmp_i = ind_M[i1*wrow + j1];
-            W[i1*wrow + tmp_i] = exp(-W[i1*wrow + tmp_i]/t);
+            tmp_i = ind_M[i1][j1];
+            W[i1][tmp_i] = exp(-W[i1][tmp_i]/t);
         }
         for (int j1 = knn+1; j1 < wcol; j1++){
-            tmp_i = ind_M[i1*wrow + j1];
-            W[i1*wrow + tmp_i] = 0;
+            tmp_i = ind_M[i1][j1];
+            W[i1][tmp_i] = 0;
         }
     }
 
     for (int i1 = 0; i1 < wrow; i1++){
         diagA[i1] = 0;
         for (int j1 = 0; j1 < i1; j1++){
-            diagA[i1] += -L[i1*wrow + j1];
+            diagA[i1] += -L[i1][j1];
         }
         for (int j1 = i1; j1 < wcol; j1++){
-            tmp_d = (W[i1*wrow + j1] + W[j1*wrow + i1])/2;
-            L[i1*wrow + j1] = -tmp_d;  // L = - A_sys
-            L[j1*wrow + i1] = -tmp_d;
+            tmp_d = (W[i1][j1] + W[j1][i1])/2;
+            L[i1][j1] = -tmp_d;  // L = - A_sys
+            L[j1][i1] = -tmp_d;
             diagA[i1] += tmp_d;
         }
     }
 
     for (int i1 = 0; i1 < wrow; i1++){
-        L[i1*wrow + i1] += diagA[i1];
+        L[i1][i1] += diagA[i1];
     }
 
     double La = 0, Da = 0, Lb = 0, Db = 0;
     for (int i1 = 0; i1 < knn; i1 ++){
         Da += diagA[i1];
         for (int j1 = 0; j1 < knn; j1++){
-            La += L[i1*wrow + j1];
+            La += L[i1][j1];
         }
     }
     for (int i1 = knn; i1 < wrow; i1 ++){
         Db += diagA[i1];
         for (int j1 = knn; j1 < wrow; j1++){
-            Lb += L[i1*wrow + j1];
+            Lb += L[i1][j1];
         }
     }
 
-    delete [] W;
-    delete [] L;
-    delete [] ind_M;
-    delete [] diagA;
     return w*(La/Da + Lb/Db);
 }
 
@@ -229,10 +229,12 @@ void EDG::compute_den(){
 void EDG::clustering(){
 
     compute_nc();
+
 //    show_M(nc, 1, N, 1, 5);
     compute_NNS();
     compute_rho();
     compute_den();
+
     // sub rho[rho>0]
 
     Graph g(N); // 5 vertices numbered from 0 to 4
@@ -244,14 +246,17 @@ void EDG::clustering(){
                 j = NN[i][k];
                 if (den[j] > 0){
                     g.addEdge(i, j);
+                    vector<int> tmp = {i, j};
+                    edge.push_back(tmp);
                 }else break;
             }
         }else{
             if (nc[i] > 0){
                 j = NN[i][0];
                 g.addEdge(i, j);
+                vector<int> tmp = {i, j};
+                edge.push_back(tmp);
             }
-
         }
     }
 

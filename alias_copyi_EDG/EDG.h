@@ -19,6 +19,7 @@ public:
     vector<vector<int>> NN;
     vector<vector<double>> NND;
     vector<vector<double>> NNS;
+    vector<vector<int>> edge;
 
     vector<int> y;
     vector<int> nc;

@@ -25,6 +25,21 @@ from functools import partial
 
 import matplotlib.pyplot as plt
 import matplotlib.transforms as mt
+import pickle
+
+def save_pkl(data, full_name, mkdir=True):
+    file_path, file_name = os.path.split(full_name)
+    if mkdir and not os.path.exists(file_path):
+        os.makedirs(file_path)
+
+    with open(full_name, 'wb') as handle:
+        pickle.dump(data, handle)
+    
+def load_pkl(file_name):
+    with open(file_name, 'rb') as handle:
+        data = pickle.load(handle)
+
+    return data
 
 
 def get_anchor(X, m, way="random"):

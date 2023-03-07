@@ -4,9 +4,9 @@ cdef extern from "CppFuns.cpp":
     pass
 
 cdef extern from "CppFuns.h" namespace "cf":
-    void argsort_TwoArr(double *v1, int *v2, int n, int *ind);
-    double median_vec2d(vector[vector[double]] &v);
-    double median_v(vector[double] &v, int copy);
+    void argsort_TwoArr(double *v1, int *v2, int n, int *ind)
+    double median_vec2d(vector[vector[double]] &v)
+    double median_v(vector[double] &v, int copy)
 
 from CppFuns.Graph_ cimport Graph
 
@@ -19,6 +19,7 @@ cdef extern from "EDG.h":
         vector[vector[int]] NN
         vector[vector[double]] NND
         vector[vector[double]] NNS
+        vector[vector[int]] edge
         vector[int] nc
         vector[int] y 
         vector[int] den

@@ -19,7 +19,9 @@ def configuration(parent_package='', top_path=None):
         library_dirs = []
         libraries = ["m"]
 
-    config = Configuration('EDG', parent_package, top_path)
+    config = Configuration('alias_copyi_EDG', parent_package, top_path)
+    config.add_data_dir('data')
+
     config.add_extension('EDG_',
                          sources=['EDG_.pyx'],
                          include_dirs = [numpy.get_include(), "./CppFuns/"],

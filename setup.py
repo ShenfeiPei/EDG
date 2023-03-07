@@ -1,8 +1,57 @@
 import setuptools  # noqa
 import os
+import shutil
 from numpy.distutils.core import setup
 from distutils.command.sdist import sdist
+from distutils.command.clean import clean as Clean
 from numpy.distutils.misc_util import Configuration
+
+
+module_name = "alias_copyi_EDG"
+
+
+class CleanCommand(Clean):
+    description = "Remove build artifacts from the source tree"
+
+    def run(self):
+        Clean.run(self)
+        # Remove c files if we are not within a sdist package
+        cwd = os.path.abspath(os.path.dirname(__file__))
+        remove_c_files = not os.path.exists(os.path.join(cwd, 'PKG-INFO'))
+        if remove_c_files:
+            print('Will remove generated .c files')
+
+        if os.path.exists('build'):
+            shutil.rmtree('build')
+
+        if os.path.exists('dist'):
+            shutil.rmtree('dist')
+
+        if os.path.exists('__pycache__'):
+            shutil.rmtree('__pycache__')
+        
+        egg_info_path = f"{module_name}.egg-info"
+        if os.path.exists(egg_info_path):
+            shutil.rmtree(egg_info_path)
+
+        for dirpath, dirnames, filenames in os.walk(module_name):
+            for filename in filenames:
+                if any(filename.endswith(suffix) for suffix in
+                       (".so", ".pyd", ".dll", ".pyc")):
+                    os.unlink(os.path.join(dirpath, filename))
+                    continue
+                extension = os.path.splitext(filename)[1]
+                if remove_c_files and extension in ['.c', '.cpp']:
+                    pyx_file = str.replace(filename, extension, '.pyx')
+                    if os.path.exists(os.path.join(dirpath, pyx_file)):
+                        os.unlink(os.path.join(dirpath, filename))
+            for dirname in dirnames:
+                if dirname == '__pycache__':
+                    shutil.rmtree(os.path.join(dirpath, dirname))
+                if dirname == 'build':
+                    shutil.rmtree(os.path.join(dirpath, dirname))
+                if dirname == 'dist':
+                    shutil.rmtree(os.path.join(dirpath, dirname))
 
 
 def configuration(parent_package='', top_path=None):
@@ -15,12 +64,11 @@ def configuration(parent_package='', top_path=None):
                        assume_default_configuration=True,
                        delegate_options_to_subpackages=True,
                        quiet=True)
-    config.add_subpackage('EDG')
+    config.add_subpackage(module_name)
     return config
 
-
-setup(name="EDG",
-      version="0.0.1",
+setup(name=module_name,
+      version="0.0.2",
       author="Shenfei Pei",
       author_email="shenfeipei@gmail.com",
       description="A Python module for machine learning",
@@ -39,6 +87,6 @@ setup(name="EDG",
                    ('Programming Language :: Python :: '
                     'Implementation :: CPython')
                    ],
-      cmdclass={'sdist': sdist},
+      cmdclass={'clean': CleanCommand, 'sdist': sdist},
       python_requires=">=3.8",
       configuration=configuration)

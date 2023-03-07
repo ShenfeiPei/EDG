@@ -18,9 +18,16 @@ cdef class PyEDG:
         return np.array(self.c_EDG.y)
 
     @property
+    def edge(self):
+        return np.array(self.c_EDG.edge)
+
+    @property
     def rho(self):
         return np.array(self.c_EDG.rho)
 
+    @property
+    def nc(self):
+        return np.array(self.c_EDG.nc)
     @property
     def den(self):
         return np.array(self.c_EDG.den)
